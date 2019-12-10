@@ -2,22 +2,35 @@ package main
 
 import (
 	"fmt"
+	"github.com/natecowen/lenslocked.com/views"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-func home(w http.ResponseWriter, r *http.Request){
+//Globals
+var _404 http.Handler = http.HandlerFunc(notFound)
+
+//Gloabals - VIEWS
+var homeView *views.View
+var contactView *views.View
+
+func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<h1>Welcome to my awesome site!</h1>")
+	err := homeView.Template.Execute(w, nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func contact(w http.ResponseWriter, r *http.Request){
+func contact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<p>To get in touch, please send an email to <a href=\"mailto:support@lenslocked.com\"> support@lenslocked.com</a>.</p>")
+	err := contactView.Template.Execute(w, nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
-		//fmt.Fprint(w, "<h1>We could not find the page you were looking for.</h1><p>Please email us if you keep being sent to an invalid page</p>")
 
 func faq(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "text/html")
@@ -29,9 +42,11 @@ func notFound(w http.ResponseWriter, r *http.Request){
 	fmt.Fprint(w, "<h1>404 - Content Not Found</h1><p>Something went wrong, the page you are looking for does not exist. Please try again.</p>")
 }
 
-var _404 http.Handler = http.HandlerFunc(notFound)
-
 func main() {
+	homeView = views.NewView("views/home.gohtml")
+	contactView = views.NewView("views/contact.gohtml")
+
+
 	r := mux.NewRouter()
 	r.NotFoundHandler = _404
 	r.HandleFunc("/", home)
