@@ -12,30 +12,32 @@ import (
 var _404 http.Handler = http.HandlerFunc(notFound)
 
 //Gloabals - VIEWS
-var homeView *views.View
 var contactView *views.View
-
-func home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	err := homeView.Template.Execute(w, nil)
-	if err != nil {
-		panic(err)
-	}
-}
+var faqView *views.View
+var homeView *views.View
 
 func contact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	err := contactView.Template.Execute(w, nil)
-	if err != nil {
+	must(contactView.Render(w, nil))
+}
+
+func faq(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "text/html")
+	must(faqView.Render(w, nil))
+}
+
+func home(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	must(homeView.Render(w, nil))
+}
+
+func must(err error){
+	if err !=nil {
 		panic(err)
 	}
 }
 
 
-func faq(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, "<h1>Frequently Asked Questions</h1><p>Future content will be put here.</p>")
-}
 
 func notFound(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "text/html")
@@ -43,9 +45,9 @@ func notFound(w http.ResponseWriter, r *http.Request){
 }
 
 func main() {
-	homeView = views.NewView("views/home.gohtml")
-	contactView = views.NewView("views/contact.gohtml")
-
+	contactView = views.NewView("bootstrap", "views/contact.gohtml")
+	faqView = views.NewView("bootstrap", "views/faq.gohtml")
+	homeView = views.NewView("bootstrap", "views/home.gohtml")
 
 	r := mux.NewRouter()
 	r.NotFoundHandler = _404
