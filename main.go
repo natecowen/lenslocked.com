@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/natecowen/lenslocked.com/controllers"
-	"github.com/natecowen/lenslocked.com/views"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -12,27 +11,9 @@ import (
 //Globals
 var _404 http.Handler = http.HandlerFunc(notFound)
 
-//Gloabals - VIEWS
-var (
-	contactView *views.View
-	faqView     *views.View
-	homeView    *views.View
-)
 
-func contact(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	must(contactView.Render(w, nil))
-}
 
-func faq(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	must(faqView.Render(w, nil))
-}
 
-func home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html")
-	must(homeView.Render(w, nil))
-}
 
 func must(err error) {
 	if err != nil {
@@ -46,19 +27,18 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	contactView = views.NewView("bootstrap", "views/contact.gohtml")
-	faqView = views.NewView("bootstrap", "views/faq.gohtml")
-	homeView = views.NewView("bootstrap", "views/home.gohtml")
 
 	//controller import
 	usersC := controllers.NewUsers()
+	staticC := controllers.NewStatic()
 
 	//router functionality
 	r := mux.NewRouter()
 	r.NotFoundHandler = _404
-	r.HandleFunc("/contact", contact).Methods("GET")
-	r.HandleFunc("/faq", faq).Methods("GET")
-	r.HandleFunc("/", home).Methods("GET")
+	r.Handle("/contact", staticC.Contact).Methods("GET")
+	r.Handle("/", staticC.Home).Methods("GET")
+	r.Handle("/faq", staticC.FAQ).Methods("GET")
+
 	r.HandleFunc("/signup", usersC.New).Methods("GET")
 	r.HandleFunc("/signup", usersC.Create).Methods("POST")
 	http.ListenAndServe(":3000", r)
